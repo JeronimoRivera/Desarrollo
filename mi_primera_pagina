@@ -1,1 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mi primera pagina</title>
+    <style>
+      body { font-family: Arial, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; text-align:center; }
+      header { margin-bottom: 1rem; }
+      h1 { color: #2c3e50; }
+      .dice-area { display:inline-block; margin: 1rem 0; }
+      svg { width: 240px; height: 240px; display:block; margin: 0 auto; transition: transform .7s ease; }
+      polygon { fill: #f1c40f; stroke: #b07f00; stroke-width: 2; }
+      .center-number { font-size: 40px; font-weight:700; fill: #2c3e50; }
+      #result { margin-top: 1rem; background:#f7f9fb; padding: 1rem; border-radius: 6px; color:#34495e; text-align:left; }
+      button { background:#2c3e50; color:white; border:none; padding:0.6rem 1rem; border-radius:6px; cursor:pointer; }
+      button:active{ transform: translateY(1px); }
+    </style>
+</head>
+<body>
+    <header>
+      <h1 id="page-title"></h1>
+      <p id="page-description">Lanza el dado de 20 lados y lee un chiste con sabor a Medellín.</p>
+    </header>
 
+    <main>
+      <div class="dice-area" aria-hidden="false">
+        <svg id="d20" viewBox="-120 -120 240 240" role="img" aria-label="Dado de veinte caras">
+          <!-- polygon y número se generan por JS -->
+        </svg>
+        <button id="roll-btn">¿En qué lado cayó el dado?</button>
+      </div>
+
+      <div id="result" aria-live="polite">
+        <strong>Resultado:</strong>
+        <div id="roll-text">Presiona el botón para lanzar el dado.</div>
+      </div>
+    </main>
+
+    <script>
+      // muestra el <title> del documento
+      document.getElementById('page-title').textContent = document.title;
+
+      // chistes con humor negro leve, contexto paisa/Medellín
+        const jokes = [
+    "¿Cómo se despiden los químicos? Ácido un placer.",
+    "¿Qué hace una escoba en el gimnasio? Barra.",
+    "¿Qué le dice un techo a otro? Techo de menos.",
+    "¿Por qué el libro de matemáticas está triste? Porque tiene muchos problemas.",
+    "¿Qué hace un pez? Nada.",
+    "¿Cómo se llama el campeón de esgrima japonés? Tokofilo.",
+    "¿Qué le dice una pared a la otra? Nos vemos en la esquina.",
+    "¿Por qué el cementerio tiene rejas? Porque la gente se muere por entrar.",
+    "¿Qué hace un electricista en una fiesta? Contactos.",
+    "¿Cómo se llama un perro mágico? Labracadabrador.",
+    "¿Por qué los fantasmas no mienten? Porque se les transparenta todo.",
+    "¿Qué le dice un semáforo a otro? No me mires que me pongo rojo.",
+    "¿Cómo se llama el primo vegetariano de Bruce Lee? Broco Lee.",
+    "¿Qué hace un ladrón en el gimnasio? Pesas.",
+    "¿Cómo se dice pañuelo en japonés? Saka-moko.",
+    "¿Qué le dice un jardinero a otro? Vamos por partes.",
+    "¿Por qué las vacas usan campana? Porque el cuerno no suena.",
+    "¿Cómo se llama el campeón de buceo francés? Tocofond.",
+    "¿Qué hace un pollo con capa? Superpollo.",
+    "¿Por qué el ordenador fue al médico? Porque tenía virus.",
+    "¿Qué le dice un número impar a otro? Somos raros.",
+    "¿Cómo se despiden los matemáticos? Hasta el infinito… y más allá.",
+    "¿Qué hace Drácula en la cocina? Sacar jugo.",
+    "¿Por qué el reloj se fue al psicólogo? Porque tenía problemas con el tiempo.",
+    "¿Qué hace una vaca en una piscina? Nada leche.",
+    "¿Cómo se llama el hermano vegano de Thor? Tofu.",
+    "¿Por qué los pájaros no usan Facebook? Porque ya tienen Twitter.",
+    "¿Qué le dice un cable a otro? Somos la corriente.",
+    "¿Por qué el pan fue al gimnasio? Para ponerse en forma.",
+    "¿Qué hace un muerto en una discoteca? Levanta polvo."
+    ];
+
+      const svg = document.getElementById('d20');
+
+      // dibuja un polígono regular con 20 lados y un número en el centro
+      function drawD20(number) {
+        svg.innerHTML = '';
+        const sides = 20;
+        const r = 100;
+        const points = [];
+        for (let i = 0; i < sides; i++) {
+          const angle = (Math.PI * 2 * i / sides) - Math.PI / 2; // iniciar arriba
+          const x = Math.cos(angle) * r;
+          const y = Math.sin(angle) * r;
+          points.push(`${x},${y}`);
+        }
+        const poly = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+        poly.setAttribute('points', points.join(' '));
+        svg.appendChild(poly);
+
+        const text = document.createElementNS('http://www.w3.org/2000/svg','text');
+        text.setAttribute('class','center-number');
+        text.setAttribute('x', '0');
+        text.setAttribute('y', '12'); // centrado visual
+        text.setAttribute('text-anchor','middle');
+        text.textContent = number !== undefined ? number : '?';
+        svg.appendChild(text);
+      }
+
+      // animación al lanzar
+      function animateRoll() {
+        svg.style.transform = `rotate(${Math.floor(Math.random()*720) - 360}deg)`;
+      }
+
+      // acción al presionar el botón
+      document.getElementById('roll-btn').addEventListener('click', () => {
+        const n = Math.floor(Math.random() * 20) + 1; // 1..20
+        drawD20(n);
+        animateRoll();
+        const joke = jokes[n-1] || '¡Ese lado no tiene chiste aún!';
+        document.getElementById('roll-text').textContent = `El dado cayó en el lado ${n}: ${joke}`;
+      });
+
+      // dibujar d20 inicial
+      drawD20('?');
+    </script>
+</body>
+</html>
